@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout android:id="@+id/TableLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/textViewScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FF0000FF"
+        android:gravity="top|left"
+        android:text="Score: 150   Category: Movies   Question: 5"
+        android:textColor="#FFFFFFFF" />
+    
+    <TextView
+        android:id="@+id/textViewQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="#FF0000FF"
+        android:gravity="center"
+        android:text="What is 2+2?"
+        android:textColor="#FFFFFFFF">
+    </TextView>
+
+        <Button
+            android:id="@+id/buta"
+            android:layout_weight="1"
+            android:onClick="chooseAnswer"
+            android:adjustViewBounds="true"
+            android:gravity="left|center"
+            android:text="A:" />
+
+        <Button
+            android:id="@+id/butb"
+            android:layout_weight="1"
+            android:onClick="chooseAnswer"
+            android:adjustViewBounds="true"
+            android:gravity="left|center"
+            android:text="B:" />
+
+         <Button
+            android:id="@+id/butc"
+            android:layout_weight="1"
+            android:onClick="chooseAnswer"
+            android:adjustViewBounds="true"
+            android:gravity="left|center"
+            android:text="C:"/>
+
+        <Button
+            android:id="@+id/butd"
+            android:layout_weight="1"
+            android:onClick="chooseAnswer"
+            android:adjustViewBounds="true"
+            android:gravity="left|center"
+            android:text="D:"/>
+    
+
+</TableLayout>

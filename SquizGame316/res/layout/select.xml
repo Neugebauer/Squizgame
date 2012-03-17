@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout android:id="@+id/TableLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+        <Button
+            android:id="@+id/playerSolo"
+            android:layout_weight="1"
+            android:onClick="chooseMode"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:text="Solo Offline" />
+
+        <Button
+            android:id="@+id/playersOffline"
+            android:layout_weight="1"
+            android:onClick="chooseMode"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:text="Multi-Player Offline 1-Phone" />
+
+         <Button
+            android:id="@+id/playersOnline"
+            android:layout_weight="1"
+            android:onClick="chooseMode"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:text="Multi-Player Online Multi-Phone"/>
+
+        <Button
+            android:id="@+id/playersTeam"
+            android:layout_weight="1"
+            android:onClick="chooseMode"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:text="Team Online Multi-Phone"/>
+
+</TableLayout>

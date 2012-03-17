@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popup_credits"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/graypopup"
+    android:orientation="vertical"
+    android:padding="10dip" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dip"
+        android:gravity="center"
+        android:text="TicTacToeJam"
+        android:textColor="#000000"
+        android:textSize="25dp" />
+    
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dip"
+        android:gravity="center"
+        android:text="Presented By"
+        android:textColor="#000000"
+        android:textSize="15dp" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dip"
+        android:text="Squidwrench.org"
+        android:autoLink="all"
+        android:textColor="#000000"
+        android:textSize="10dp" />
+    
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Your name or nickname \nBrian Neugebauer \nMore Names"
+        android:autoLink="all"
+        android:textColor="#000000"
+        android:textSize="10dp" />
+    
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="Graphics: \nBrian Neugebauer \nclipartsfree.net (netalloy)"
+        android:textColor="#000000"
+        android:textSize="8dp" />
+    
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="Sounds: \nfreesound.org (Samuel Lourenço, Joel Azzopardi, Pierre Cartoon Sounds, Cabeeno Rossley, notchfilter, johnnypanic)"
+        android:textColor="#000000"
+        android:textSize="8dp" />
+    
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:gravity="bottom|center"
+        android:layout_gravity="bottom"
+        android:text="\u00A9 2012"
+        android:textColor="#000000"
+        android:textSize="10dp" />
+        
+    
+</LinearLayout>
