@@ -42,8 +42,12 @@ Brian Neugebauer,
 */
 
 public class SquizGame extends Activity implements SensorEventListener {
+	public int numplayers = 1;
+	public int numquestions = 10;
+	public int questionNumber = 1;
+	public String questionArray[][][] = new String[10][40][1];
+	public int score = 0;
 	public String playername = "X", startingplayer = "X";
-	public int rows = 3, cols = 3, moves, moveslimit = rows * cols, xscore, oscore, tscore, toechosen;
 	public int pointcount[] = new int[8]; //R1,R2,R3,C1,C2,C3,DD,DU = ways to win, 3 or -3 means a win
 	public int squaremoves[] = new int[15]; //0 = first move, positive = O, negative = X, TL,TM,TR,ML,MM,MR,BL,BM,BR
 	public boolean gameover = false, computeropponent = false, toe = false;
@@ -66,6 +70,7 @@ public class SquizGame extends Activity implements SensorEventListener {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	popup("hello");
         super.onCreate(savedInstanceState);    
 		sensMgr = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = sensMgr.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -113,8 +118,8 @@ public class SquizGame extends Activity implements SensorEventListener {
 		cBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFF00FF00));
 		dBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFFFF00FF));
 	    
-		showWhoseTurn();
-		showScore();
+		//showWhoseTurn();
+		//showScore();
 		 
     }
     
@@ -138,9 +143,9 @@ public class SquizGame extends Activity implements SensorEventListener {
       savedInstanceState.putString("playername", playername);
       savedInstanceState.putBoolean("vscomputer", computeropponent);
       savedInstanceState.putBoolean("toe", toe);
-      savedInstanceState.putInt("xwins", xscore);
-      savedInstanceState.putInt("owins", oscore);
-      savedInstanceState.putInt("twins", tscore);   
+//      savedInstanceState.putInt("xwins", xscore);
+//      savedInstanceState.putInt("owins", oscore);
+//      savedInstanceState.putInt("twins", tscore);   
       super.onSaveInstanceState(savedInstanceState);
     }
     
@@ -172,18 +177,47 @@ public class SquizGame extends Activity implements SensorEventListener {
         dBut.setClickable(clickable);
 	}
 	
+	public void getQuestions(int numquestions, String category) {
+		//Select * from question,answer,category.questioncategory where category = x, etc
+		//populate question array
+	}
+	
+	public void askQuestion() {
+		Collections.shuffle(Arrays.asList(questionArray[questionNumber]));
+		tvQuestion.setText(questionArray[questionNumber][0].toString());
+		aBut.setText(questionArray[questionNumber][0].toString());
+		aBut.setTag(questionArray[questionNumber][0][0]);
+		bBut.setText(questionArray[questionNumber][1].toString());
+		bBut.setTag(questionArray[questionNumber][1][0]);
+		cBut.setText(questionArray[questionNumber][2].toString());
+		cBut.setTag(questionArray[questionNumber][2][0]);
+		dBut.setText(questionArray[questionNumber][3].toString());
+		dBut.setTag(questionArray[questionNumber][3][0]);
+	}
 
 	public void chooseAnswer(View view) {
 		chosenGlow(view.getId());
+		//delay
+		checkAnswer(view.getId());
     }
     
-    public boolean checkForWinCondition() {
-    	if (moves < (2 * rows - 1)) return false;    		
+    public boolean checkForWinCondition() {  		
     	int check[] = pointcount.clone();
     	Arrays.sort(check);
     	if (check[0] == -3 || check[7] == 3)
     		return true;    		
     	return false;
+    }
+    
+    public void checkAnswer(int buttonID) {
+    	Button button = (Button) findViewById(buttonID);
+    	if (button.getTag() == "1") {
+    		//correct
+    	}
+    	else {
+    		//incorrect
+    	}
+    		
     }
 
     @Override
@@ -204,7 +238,7 @@ public class SquizGame extends Activity implements SensorEventListener {
     			return true;
     		case R.id.loadGame:
     			SharedPreferences settings = getSharedPreferences("SAVEGAME", 0);        
-       			loadGame(settings.getString("gmoves",""),settings.getBoolean("gameover",gameover),settings.getString("playername",playername),settings.getBoolean("vscomputer",computeropponent),settings.getBoolean("toe",toe),settings.getInt("xwins",xscore),settings.getInt("owins",oscore),settings.getInt("twins",tscore));
+//       			loadGame(settings.getString("gmoves",""),settings.getBoolean("gameover",gameover),settings.getString("playername",playername),settings.getBoolean("vscomputer",computeropponent),settings.getBoolean("toe",toe),settings.getInt("xwins",xscore),settings.getInt("owins",oscore),settings.getInt("twins",tscore));
     			return true;
     		case R.id.clearScore:
     			clearScore();
@@ -222,8 +256,7 @@ public class SquizGame extends Activity implements SensorEventListener {
 
 	private void startOver() {
 		gameover = false;
-		moves = 0;
-		moveslimit = 9;
+
 		Arrays.fill(pointcount, 0);
 		Arrays.fill(squaremoves, 0);
 		startingplayer = (startingplayer.equals("X")) ? "O" : "X";
@@ -235,7 +268,7 @@ public class SquizGame extends Activity implements SensorEventListener {
 
 	public void showScore() {
 		TextView tvs = (TextView) findViewById(R.id.textViewScore);
-		tvs.setText("Score:   X:" + xscore + "   O:" + oscore + "   Tie:" + tscore);
+		tvs.setText("Score:   X:" + score + "   O:" + score + "   Tie:" + score);
 	}
 	
 	public void showWhoseTurn() {
@@ -290,9 +323,9 @@ public class SquizGame extends Activity implements SensorEventListener {
 		editor.putString("playername", playername);
 		editor.putBoolean("vscomputer", computeropponent);
 	    editor.putBoolean("toe", toe);
-	    editor.putInt("xwins", xscore);
-	    editor.putInt("owins", oscore);
-	    editor.putInt("twins", tscore);
+//	    editor.putInt("xwins", xscore);
+//	    editor.putInt("owins", oscore);
+//	    editor.putInt("twins", tscore);
 	    editor.commit();
 	}
 	
@@ -377,25 +410,19 @@ public class SquizGame extends Activity implements SensorEventListener {
 	            	playername = "X";
 	            else
 	            	playername = "O";
-	            if (toehold && (moves == 5 || moves == 9 || moves == 13)) {
-	            }
-	            if (toehold && (moves == 3 || moves == 7 || moves == 11)) {
-	                toechosen = mov;
-		            moveslimit += 2;
-	            }
-	            else {
+	            
 	            	button = (ImageButton) findViewById(Math.abs(mov));
 	    	        button.performClick();
-	            }
+	            
 	        }
 	        
 	        sound = remsound;
 	        toe = toehold;
 	        computeropponent = comphold;
 	        
-	        xscore = Math.max(lxwins,xscore);
-	        oscore = Math.max(lowins,oscore);
-	        tscore = Math.max(ltwins,tscore);
+//	        xscore = Math.max(lxwins,xscore);
+//	        oscore = Math.max(lowins,oscore);
+//	        tscore = Math.max(ltwins,tscore);
 	        showScore();
 		
 			gameover = lgameover;
@@ -410,9 +437,9 @@ public class SquizGame extends Activity implements SensorEventListener {
 	}
 	
 	public void clearScore() {
-		xscore = 0;
-		oscore = 0;
-		tscore = 0;
+//		xscore = 0;
+//		oscore = 0;
+//		tscore = 0;
 		showScore();
 	}
 	

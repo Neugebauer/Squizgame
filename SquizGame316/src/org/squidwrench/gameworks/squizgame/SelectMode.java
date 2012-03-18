@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
@@ -42,25 +43,15 @@ Brian Neugebauer,
 */
 
 public class SelectMode extends Activity implements SensorEventListener {
-	public String playername = "X", startingplayer = "X";
-	public int rows = 3, cols = 3, moves, moveslimit = rows * cols, xscore, oscore, tscore, toechosen;
-	public int pointcount[] = new int[8]; //R1,R2,R3,C1,C2,C3,DD,DU = ways to win, 3 or -3 means a win
-	public int squaremoves[] = new int[15]; //0 = first move, positive = O, negative = X, TL,TM,TR,ML,MM,MR,BL,BM,BR
-	public boolean gameover = false, computeropponent = false, toe = false;
-	public boolean firstOnResume = true;
 	private SensorManager sensMgr;
 	private Sensor accelerometer;
     private static SoundPool sounds;
     private static int xbeep, obeep, toebeep, gamewin, gametie, complaugh; 
     private static boolean sound = true;
-    public Random rand = new Random();
-    public boolean online = false;
-    public int viewWidth = 0;
-    public int viewHeight = 0;
-    public int orient; //0 = vertical, 1 = horizontal
+    private int viewWidth = 0;
+    private int viewHeight = 0;
+    private int orient; //0 = vertical, 1 = horizontal
     private PopupWindow pwcredits;
-    public final List<Integer> answerButtons = new ArrayList<Integer>(Arrays.asList(R.id.buta,R.id.butb,R.id.butc,R.id.butd)); 
-    public TextView tvQuestion;
     public Button aBut, bBut, cBut, dBut;
 	
     /** Called when the activity is first created. */
@@ -133,15 +124,15 @@ public class SelectMode extends Activity implements SensorEventListener {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
       //Save gamestate for orientation change or interruption by phonecall, etc
-      savedInstanceState.putString("gmoves", Arrays.toString(squaremoves).replace("[", "").replace("]", "").replace(" ", ""));
-      savedInstanceState.putBoolean("gameover", gameover);
-      savedInstanceState.putString("playername", playername);
-      savedInstanceState.putBoolean("vscomputer", computeropponent);
-      savedInstanceState.putBoolean("toe", toe);
-      savedInstanceState.putInt("xwins", xscore);
-      savedInstanceState.putInt("owins", oscore);
-      savedInstanceState.putInt("twins", tscore);   
-      super.onSaveInstanceState(savedInstanceState);
+//      savedInstanceState.putString("gmoves", Arrays.toString(squaremoves).replace("[", "").replace("]", "").replace(" ", ""));
+//      savedInstanceState.putBoolean("gameover", gameover);
+//      savedInstanceState.putString("playername", playername);
+//      savedInstanceState.putBoolean("vscomputer", computeropponent);
+//      savedInstanceState.putBoolean("toe", toe);
+//      savedInstanceState.putInt("xwins", xscore);
+//      savedInstanceState.putInt("owins", oscore);
+//      savedInstanceState.putInt("twins", tscore);   
+//      super.onSaveInstanceState(savedInstanceState);
     }
     
     @Override
@@ -173,19 +164,15 @@ public class SelectMode extends Activity implements SensorEventListener {
 	}
 	
 
-	public void chooseAnswer(View view) {
-		chosenGlow(view.getId());
+	public void chooseMode(View view) {
+		switch(view.getId()) {
+			case R.id.playerSolo:
+				Intent openSquizGame = new Intent(SelectMode.this, SquizGame.class);
+				SelectMode.this.startActivity(openSquizGame);    
+	            finish();
+		}
     }
     
-    public boolean checkForWinCondition() {
-    	if (moves < (2 * rows - 1)) return false;    		
-    	int check[] = pointcount.clone();
-    	Arrays.sort(check);
-    	if (check[0] == -3 || check[7] == 3)
-    		return true;    		
-    	return false;
-    }
-
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
     	MenuInflater inflater = getMenuInflater();
@@ -204,7 +191,7 @@ public class SelectMode extends Activity implements SensorEventListener {
     			return true;
     		case R.id.loadGame:
     			SharedPreferences settings = getSharedPreferences("SAVEGAME", 0);        
-       			loadGame(settings.getString("gmoves",""),settings.getBoolean("gameover",gameover),settings.getString("playername",playername),settings.getBoolean("vscomputer",computeropponent),settings.getBoolean("toe",toe),settings.getInt("xwins",xscore),settings.getInt("owins",oscore),settings.getInt("twins",tscore));
+//       			loadGame(settings.getString("gmoves",""),settings.getBoolean("gameover",gameover),settings.getString("playername",playername),settings.getBoolean("vscomputer",computeropponent),settings.getBoolean("toe",toe),settings.getInt("xwins",xscore),settings.getInt("owins",oscore),settings.getInt("twins",tscore));
     			return true;
     		case R.id.clearScore:
     			clearScore();
@@ -221,27 +208,18 @@ public class SelectMode extends Activity implements SensorEventListener {
     }
 
 	private void startOver() {
-		gameover = false;
-		moves = 0;
-		moveslimit = 9;
-		Arrays.fill(pointcount, 0);
-		Arrays.fill(squaremoves, 0);
-		startingplayer = (startingplayer.equals("X")) ? "O" : "X";
-		playername = startingplayer;
-		showWhoseTurn();
-		showScore();
+//		gameover = false;
+//		moves = 0;
+//		moveslimit = 9;
+//		Arrays.fill(pointcount, 0);
+//		Arrays.fill(squaremoves, 0);
+//		startingplayer = (startingplayer.equals("X")) ? "O" : "X";
+//		playername = startingplayer;
+
 
 	}
 
-	public void showScore() {
-		TextView tvs = (TextView) findViewById(R.id.textViewScore);
-		tvs.setText("Score:   X:" + xscore + "   O:" + oscore + "   Tie:" + tscore);
-	}
-	
-	public void showWhoseTurn() {
-		TextView tv = (TextView) findViewById(R.id.textView1);
-		tv.setText("Player " + playername + "'s turn");
-	}
+
 	
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
 		return;		
@@ -285,14 +263,14 @@ public class SelectMode extends Activity implements SensorEventListener {
 	public void saveGame(String preffilename) {		
 	    SharedPreferences settings = getSharedPreferences(preffilename, 0);
 	    SharedPreferences.Editor editor = settings.edit();
-	    editor.putString("gmoves", Arrays.toString(squaremoves).replace("[", "").replace("]", "").replace(" ", ""));
-		editor.putBoolean("gameover", gameover);
-		editor.putString("playername", playername);
-		editor.putBoolean("vscomputer", computeropponent);
-	    editor.putBoolean("toe", toe);
-	    editor.putInt("xwins", xscore);
-	    editor.putInt("owins", oscore);
-	    editor.putInt("twins", tscore);
+//	    editor.putString("gmoves", Arrays.toString(squaremoves).replace("[", "").replace("]", "").replace(" ", ""));
+//		editor.putBoolean("gameover", gameover);
+//		editor.putString("playername", playername);
+//		editor.putBoolean("vscomputer", computeropponent);
+//	    editor.putBoolean("toe", toe);
+//	    editor.putInt("xwins", xscore);
+//	    editor.putInt("owins", oscore);
+//	    editor.putInt("twins", tscore);
 	    editor.commit();
 	}
 	
@@ -331,78 +309,78 @@ public class SelectMode extends Activity implements SensorEventListener {
 			boolean remsound = sound;
 			sound = false;
 	        	        
-	        computeropponent = lvscomputer;
-		    CheckBox cb = (CheckBox) findViewById(R.id.checkBoxAI);
-			if (computeropponent) {
-				if (!cb.isChecked()) {
-					playername = "X";
-					cb.setChecked(true);
-				}
-			}
-			else {
-				if (cb.isChecked())
-					cb.setChecked(false);
-			}
-			
-	        toe = ltoe;
-		    CheckBox cbtoe = (CheckBox) findViewById(R.id.checkBoxToe);
-			if (toe) {
-				if (!cbtoe.isChecked()) {
-					cbtoe.setChecked(true);
-				}
-			}
-			else {
-				if (cbtoe.isChecked())
-					cbtoe.setChecked(false);
-			}
-			
-			startOver();
-			
-			String token = ",";
-	        int[] convertedIntArray = StringToArrayConverter.convertTokenizedStringToIntArray(lmoves, token);
-	        
-	        boolean toehold = toe;
-	        boolean comphold = computeropponent;
-	                
-	        toe = false;
-	        computeropponent = false;
-	    
-	        ImageButton button;
-	        Integer mov;
-	        for (int s = 0; s < 15; s++) {
-	            mov = convertedIntArray[s];
-	            if (mov == 0) 
-	            	break;
-	            if (mov < 0)
-	            	playername = "X";
-	            else
-	            	playername = "O";
-	            if (toehold && (moves == 5 || moves == 9 || moves == 13)) {
-	            }
-	            if (toehold && (moves == 3 || moves == 7 || moves == 11)) {
-	                toechosen = mov;
-		            moveslimit += 2;
-	            }
-	            else {
-	            	button = (ImageButton) findViewById(Math.abs(mov));
-	    	        button.performClick();
-	            }
-	        }
-	        
-	        sound = remsound;
-	        toe = toehold;
-	        computeropponent = comphold;
-	        
-	        xscore = Math.max(lxwins,xscore);
-	        oscore = Math.max(lowins,oscore);
-	        tscore = Math.max(ltwins,tscore);
-	        showScore();
-		
-			gameover = lgameover;
-			if (!gameover) {
-				playername = lplayername;
-				showWhoseTurn();
-			}
+//	        computeropponent = lvscomputer;
+//		    CheckBox cb = (CheckBox) findViewById(R.id.checkBoxAI);
+//			if (computeropponent) {
+//				if (!cb.isChecked()) {
+//					playername = "X";
+//					cb.setChecked(true);
+//				}
+//			}
+//			else {
+//				if (cb.isChecked())
+//					cb.setChecked(false);
+//			}
+//			
+//	        toe = ltoe;
+//		    CheckBox cbtoe = (CheckBox) findViewById(R.id.checkBoxToe);
+//			if (toe) {
+//				if (!cbtoe.isChecked()) {
+//					cbtoe.setChecked(true);
+//				}
+//			}
+//			else {
+//				if (cbtoe.isChecked())
+//					cbtoe.setChecked(false);
+//			}
+//			
+//			startOver();
+//			
+//			String token = ",";
+//	        int[] convertedIntArray = StringToArrayConverter.convertTokenizedStringToIntArray(lmoves, token);
+//	        
+//	        boolean toehold = toe;
+//	        boolean comphold = computeropponent;
+//	                
+//	        toe = false;
+//	        computeropponent = false;
+//	    
+//	        ImageButton button;
+//	        Integer mov;
+//	        for (int s = 0; s < 15; s++) {
+//	            mov = convertedIntArray[s];
+//	            if (mov == 0) 
+//	            	break;
+//	            if (mov < 0)
+//	            	playername = "X";
+//	            else
+//	            	playername = "O";
+//	            if (toehold && (moves == 5 || moves == 9 || moves == 13)) {
+//	            }
+//	            if (toehold && (moves == 3 || moves == 7 || moves == 11)) {
+//	                toechosen = mov;
+//		            moveslimit += 2;
+//	            }
+//	            else {
+//	            	button = (ImageButton) findViewById(Math.abs(mov));
+//	    	        button.performClick();
+//	            }
+//	        }
+//	        
+//	        sound = remsound;
+//	        toe = toehold;
+//	        computeropponent = comphold;
+//	        
+//	        xscore = Math.max(lxwins,xscore);
+//	        oscore = Math.max(lowins,oscore);
+//	        tscore = Math.max(ltwins,tscore);
+//	        showScore();
+//		
+//			gameover = lgameover;
+//			if (!gameover) {
+//				playername = lplayername;
+//				showWhoseTurn();
+//			}
 
     	}catch(NullPointerException e){
     		startOver();
@@ -410,10 +388,10 @@ public class SelectMode extends Activity implements SensorEventListener {
 	}
 	
 	public void clearScore() {
-		xscore = 0;
-		oscore = 0;
-		tscore = 0;
-		showScore();
+//		xscore = 0;
+//		oscore = 0;
+//		tscore = 0;
+//		showScore();
 	}
 	
 	private void showCredits() {
