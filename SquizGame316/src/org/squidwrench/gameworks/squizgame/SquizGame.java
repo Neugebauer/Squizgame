@@ -1,10 +1,26 @@
 package org.squidwrench.gameworks.squizgame;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -17,6 +33,8 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -66,6 +84,9 @@ public class SquizGame extends Activity implements SensorEventListener {
     public final List<Integer> answerButtons = new ArrayList<Integer>(Arrays.asList(R.id.buta,R.id.butb,R.id.butc,R.id.butd)); 
     public TextView tvQuestion;
     public Button aBut, bBut, cBut, dBut;
+    public int colorUnselected = 0xFFEEEEEE;
+    public int colorSelected = 0xFF000000;
+    public int chosen, correctAnswer;
 	
     /** Called when the activity is first created. */
     @Override
@@ -109,18 +130,75 @@ public class SquizGame extends Activity implements SensorEventListener {
 	    bBut.getLayoutParams().height = Asize;
 	    cBut.getLayoutParams().height = Asize;
 	    dBut.getLayoutParams().height = Asize;
-	    aBut.setTextSize(Asize/2);
-	    bBut.setTextSize(Asize/2);
-	    cBut.setTextSize(Asize/2);
-	    dBut.setTextSize(Asize/2);
-		aBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFFFF0000));
-		bBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFF0000FF));
-		cBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFF00FF00));
-		dBut.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFFFF00FF));
+	    aBut.setTextSize(Asize/3);
+	    bBut.setTextSize(Asize/3);
+	    cBut.setTextSize(Asize/3);
+	    dBut.setTextSize(Asize/3);
+		aBut.getBackground().setColorFilter(new LightingColorFilter(colorUnselected, 0xFFFF0000));
+		aBut.setTag((Integer) 0xFFFF0000);
+		popup(0xFFFF0000);
+		bBut.getBackground().setColorFilter(new LightingColorFilter(colorUnselected, 0xFF0000ff));
+		bBut.setTag((Integer) 0xFF0000FF);
+		cBut.getBackground().setColorFilter(new LightingColorFilter(colorUnselected, 0xFF00FF00));
+		cBut.setTag((Integer) 0xFF00FF00);
+		dBut.getBackground().setColorFilter(new LightingColorFilter(colorUnselected, 0xFFFFFF00));
+		dBut.setTag((Integer) 0xFFFFFF00);
 	    
 		//showWhoseTurn();
 		//showScore();
+		queryDB();
+		loadAnswers();
 		 
+    }
+    
+    public void queryDB() {
+    	String result = "";
+    	//the year data to send
+    	ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+    	nameValuePairs.add(new BasicNameValuePair("idquestion","1"));
+    	popup("A");
+    	//http post
+    	try{
+    	        HttpClient httpclient = new DefaultHttpClient();
+    	        HttpPost httppost = new HttpPost("http://localhost/getQuestions.php");
+    	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    	        HttpResponse response = httpclient.execute(httppost);
+    	        HttpEntity entity = response.getEntity();
+    	        InputStream is = entity.getContent();
+    	        
+    	        BufferedReader reader = new BufferedReader(new InputStreamReader (is,"iso-8859-1"),8);
+    	        StringBuilder sb = new StringBuilder();
+    	        String line = null;
+    	        while ((line = reader.readLine()) != null) {
+    	                sb.append(line + "\n");
+    	        }
+    	        is.close();
+    	 
+    	        result=sb.toString();
+    	}catch(Exception e){
+    	        Log.e("log_tag", "Error converting result "+e.toString());
+    	        String seee = e.toString();
+    	        popup("E1");
+    	}
+    	popup("B");
+    	//parse json data
+    	try{
+    	        JSONArray jArray = new JSONArray(result);
+    	        for(int i=0;i<jArray.length();i++){
+    	                JSONObject json_data = jArray.getJSONObject(i);
+    	                String lgs = "idquestion: "+json_data.getInt("idquestion")+
+    	                        ", question: "+json_data.getString("questiontext")+
+    	                        ", pointvalue: "+json_data.getInt("pointvalue");
+    	                popup(lgs);
+    	                Log.i("log_tag","idquestion: "+json_data.getInt("idquestion")+
+    	                        ", question: "+json_data.getString("questiontext")+
+    	                        ", pointvalue: "+json_data.getInt("pointvalue")
+    	                );
+    	        }
+    	}catch(JSONException e){
+    	        Log.e("log_tag", "Error parsing data "+e.toString());
+    	        popup("E2");
+    	}
     }
     
     public int findOrientation() {
@@ -195,10 +273,31 @@ public class SquizGame extends Activity implements SensorEventListener {
 		dBut.setTag(questionArray[questionNumber][3][0]);
 	}
 
+    public void loadAnswers() {
+		Button button;
+		for (Integer buttonid : answerButtons) {
+			button = (Button) findViewById(buttonid);
+			button.setText(button.getText() + " 4");
+			if (buttonid == R.id.butd) {
+				button.setTag(-1 * (Integer) button.getTag());
+			}
+		}  		
+    }
+	
 	public void chooseAnswer(View view) {
-		chosenGlow(view.getId());
+		chosen = view.getId();
+		chosenGlow(chosen);
 		//delay
-		checkAnswer(view.getId());
+		Handler handler=new Handler();
+		final Runnable r = new Runnable()
+		{
+		    public void run() 
+		    {
+		        checkAnswer(chosen);
+		    }
+		};
+		handler.postDelayed(r, 1000);
+		
     }
     
     public boolean checkForWinCondition() {  		
@@ -210,14 +309,18 @@ public class SquizGame extends Activity implements SensorEventListener {
     }
     
     public void checkAnswer(int buttonID) {
-    	Button button = (Button) findViewById(buttonID);
-    	if (button.getTag() == "1") {
-    		//correct
-    	}
-    	else {
-    		//incorrect
-    	}
-    		
+		Button button;
+		for (Integer buttonid : answerButtons) {
+			button = (Button) findViewById(buttonid);
+			if ((Integer) button.getTag() > 0) {
+				correctAnswer = buttonid;
+				button.getBackground().setColorFilter(new LightingColorFilter(colorSelected, -1 * Math.abs((Integer) (button.getTag()))));
+			}
+			else if (buttonid != chosen)
+				button.getBackground().setColorFilter(new LightingColorFilter(0xFFAAAAAA, 0));
+			if (chosen == correctAnswer)
+				score += 10;
+		}  		
     }
 
     @Override
@@ -302,17 +405,21 @@ public class SquizGame extends Activity implements SensorEventListener {
 	}
  	
 
-	public void correctGlow(int winner) {
-		int glowcolor;
+	public void correctGlow(int chosen, int winner) {
 		Button button;
-		button = (Button) findViewById(winner);
-		button.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFFFF0000));
+		for (Integer buttonid : answerButtons) {
+			button = (Button) findViewById(buttonid);
+			if (buttonid == winner)
+				button.getBackground().setColorFilter(new LightingColorFilter(colorSelected, -1 * Math.abs((Integer) (button.getTag()))));
+			else if (buttonid != chosen)
+				button.getBackground().setColorFilter(new LightingColorFilter(0, 0));
+		}
 	}
 	
 	public void chosenGlow(int chosen) {
 		Button button;
 		button = (Button) findViewById(chosen);
-		button.getBackground().setColorFilter(new LightingColorFilter(0xFFEEEEEE, 0xFFFF0000));
+		button.getBackground().setColorFilter(new LightingColorFilter(colorSelected, -1 * Math.abs((Integer) (button.getTag()))));
 	}
 
 	public void saveGame(String preffilename) {		
